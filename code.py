@@ -1,13 +1,13 @@
-from itertools import count
 import cv2 as cv
-from cv2 import FONT_HERSHEY_COMPLEX
-import cvzone as cvz
-from cv2 import VideoCapture
-import mediapipe as mp
 import PositionModule as pm
-import math,serial,time
-count = 0
-arduino = serial.Serial(port='/dev/ttyUSB0', baudrate=9600, timeout=.1)
+import math
+import pyfirmata
+count = 0    
+global pin9
+board=pyfirmata.Arduino('/dev/ttyUSB0')
+iter8 = pyfirmata.util.Iterator(board)
+iter8.start()
+pin9 = board.get_pin('d:9:s')
 cap = cv.VideoCapture(0)#records video from the camera
 pTime = 0
 detector = pm.poseDetector()
@@ -29,17 +29,13 @@ while True:
             cv.line(img,(320,480),(x,y),(0,255,0),2)
             angle = int(math.degrees(math.atan2(y - 480, x - 320) -
                              math.atan2(-480,0)))
-            
             angle = angle+90
             print(angle)    
         #img pos is the position coordinates of the image as a dictionary with key as name of the image,
         # print(lmList[16])
             
-            cv.circle(img, (lmList[14][1], lmList[14][2]), 15, (0, 255, 0), cv.FILLED)
-            arduino.write(bytes(str(angle),'utf-8'))
-            val = arduino.readlines()
-            print(val)
-            time.sleep(.5)
+            #cv.circle(img, (lmList[14][1], lmList[14][2]), 15, (0, 255, 0), cv.FILLED)
+            pin9.write(angle)
     # angle = detector.findAngle(img, 16, 14, 12, draw=False)
     # print(angle)
     # fpsReader = cvz.FPS()
